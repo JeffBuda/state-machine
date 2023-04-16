@@ -94,5 +94,5 @@ export function executeGameAction(action: GameStateAction, actionData: IActionDa
             }
             throw new Error(`Waiting on Player 1 to Pick.`);
     }
-    throw new Error(`Invalid action or state data.`);
+    throw new Error(`Action ${action} with Action Data ${JSON.stringify(actionData)} is not valid for current State ${gameData.state}.`);
 }
