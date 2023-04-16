@@ -158,6 +158,6 @@ export function findDomino(dominos:Domino[], rank:number) {
     return dominos.find(d => d.rank === rank);
 } 
 
-export function ofState(dominos:Domino[], state:DominoState) {
+export function dominosOfState(dominos:Domino[], state:DominoState) {
     return dominos.filter(d => d.state === state);
 }

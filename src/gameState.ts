@@ -1,4 +1,4 @@
-import { Domino, DominoState, DominoStateAction, findDomino, getDominos, getNextDominoState as setDominoState, ofState as dominosOfState } from "./domino";
+import { Domino, DominoState, DominoStateAction, findDomino, getDominos, getNextDominoState as setDominoState, dominosOfState as dominosOfState } from "./domino";
 
 
 export enum GameState {
@@ -40,13 +40,21 @@ export interface IGameData {
     player2: string;
 }
 
+export interface IActionData {
+    player1: string;
+    player2: string;
+    dominoRank?: number;
+}
 
-
-export function getNextGameState(action: GameStateAction, actionData: any, data: IGameData): IGameData {
+export function executeGameAction(action: GameStateAction, actionData: IActionData, data?: IGameData): IGameData {
 
     if (action === GameStateAction.Initialize) {
-        const newData = {
-            ...data,
+        if(!actionData.player1 || !actionData.player2)
+            throw new Error(`Players must be specified.`);
+
+        const newData:IGameData = {
+            player1: actionData.player1,
+            player2: actionData.player2,
             dominos: getDominos(),
             state: GameState.Pick1_Player1,
         };
@@ -65,7 +73,12 @@ export function getNextGameState(action: GameStateAction, actionData: any, data:
         dominosOfState(newData.dominos, DominoState.InDrawPile)
             .slice(0, 4)
             .forEach(d => d.state = setDominoState(d.state, DominoStateAction.PlaceInPickList));
+        
+        return newData;
     }
+
+    if (!data)
+        throw new Error(`Command ${action} requires data.`);
 
     switch (data.state) {
         case GameState.Pick1_Player1:
@@ -74,7 +87,7 @@ export function getNextGameState(action: GameStateAction, actionData: any, data:
                     ...data,
                     state: GameState.Pick1_Player2,
                 }
-                const picked = findDomino(newData.dominos, actionData.rank);
+                const picked = findDomino(newData.dominos, actionData!.dominoRank!);
                 picked!.state = setDominoState(picked!.state!, DominoStateAction.ClaimByPlayer);
                 return newData;
             }
