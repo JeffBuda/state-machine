@@ -1,7 +1,7 @@
-import { add } from '../src/stateMachine';
+import { StateMachine } from '../src/stateMachine';
 
 describe('test', () => {
   it('should add two numbers', () => {
-    expect(add(1, 2)).toBe(3);
+    expect(new StateMachine('jeff')).toBeTruthy();
   });
 });
