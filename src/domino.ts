@@ -62,11 +62,8 @@ export class Domino {
         public readonly tileA: Tile,
         public readonly tileB: Tile,
         public readonly rank: number,
-        public state?: DominoState,
+        public state: DominoState,
         public stateDetail?: string) {
-        if (!state) {
-            this.state = DominoState.Uninitialized;
-        }
     }
     public toString(): string {
         return `Domino ${this.rank} with ${this.tileA} and ${this.tileB} (${this.state} ${this.stateDetail})`;
@@ -87,56 +84,64 @@ export function drawForNewRound(dominos: Array<Domino>) {
         .forEach(d => d.state = DominoState.InPickList_Available);
 }
 
+function shuffle<T>(a: Array<T>): Array<T> {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
 export function getDominos() {
     const dominos = [
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.wheat, 0), 1),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.wheat, 0), 2),
-        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.forest, 0), 3),
-        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.forest, 0), 4),
-        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.forest, 0), 5),
-        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.forest, 0), 6),
-        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.water, 0), 7),
-        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.water, 0), 8),
-        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.water, 0), 9),
-        new Domino(new Tile(TileKind.field, 0), new Tile(TileKind.field, 0), 10),
-        new Domino(new Tile(TileKind.field, 0), new Tile(TileKind.field, 0), 11),
-        new Domino(new Tile(TileKind.swamp, 0), new Tile(TileKind.swamp, 0), 12),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.forest, 0), 13),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.water, 0), 14),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.field, 0), 15),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.swamp, 0), 16),
-        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.water, 0), 17),
-        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.field, 0), 18),
-        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.forest, 0), 19),
-        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.water, 0), 20),
-        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.field, 0), 21),
-        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.swamp, 0), 22),
-        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.mine, 0), 23),
-        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.wheat, 0), 24),
-        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.wheat, 0), 25),
-        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.wheat, 0), 26),
-        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.wheat, 0), 27),
-        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.water, 0), 28),
-        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.field, 0), 29),
-        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.wheat, 0), 30),
-        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.wheat, 0), 31),
-        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.forest, 0), 32),
-        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.forest, 0), 33),
-        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.forest, 0), 34),
-        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.forest, 0), 35),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.field, 1), 36),
-        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.field, 1), 37),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.swamp, 1), 38),
-        new Domino(new Tile(TileKind.field, 0), new Tile(TileKind.swamp, 1), 39),
-        new Domino(new Tile(TileKind.mine, 1), new Tile(TileKind.wheat, 0), 40),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.field, 2), 41),
-        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.field, 2), 42),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.swamp, 2), 43),
-        new Domino(new Tile(TileKind.field, 0), new Tile(TileKind.swamp, 2), 44),
-        new Domino(new Tile(TileKind.mine, 2), new Tile(TileKind.wheat, 0), 45),
-        new Domino(new Tile(TileKind.swamp, 0), new Tile(TileKind.mine, 2), 46),
-        new Domino(new Tile(TileKind.swamp, 0), new Tile(TileKind.mine, 2), 47),
-        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.mine, 3), 48)
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.wheat, 0), 1, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.wheat, 0), 2, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.forest, 0), 3, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.forest, 0), 4, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.forest, 0), 5, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.forest, 0), 6, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.water, 0), 7, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.water, 0), 8, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.water, 0), 9, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.field, 0), new Tile(TileKind.field, 0), 10, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.field, 0), new Tile(TileKind.field, 0), 11, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.swamp, 0), new Tile(TileKind.swamp, 0), 12, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.forest, 0), 13, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.water, 0), 14, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.field, 0), 15, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.swamp, 0), 16, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.water, 0), 17, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 0), new Tile(TileKind.field, 0), 18, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.forest, 0), 19, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.water, 0), 20, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.field, 0), 21, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.swamp, 0), 22, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 1), new Tile(TileKind.mine, 0), 23, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.wheat, 0), 24, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.wheat, 0), 25, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.wheat, 0), 26, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.wheat, 0), 27, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.water, 0), 28, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.forest, 1), new Tile(TileKind.field, 0), 29, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.wheat, 0), 30, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.wheat, 0), 31, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.forest, 0), 32, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.forest, 0), 33, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.forest, 0), 34, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 1), new Tile(TileKind.forest, 0), 35, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.field, 1), 36, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.field, 1), 37, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.swamp, 1), 38, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.field, 0), new Tile(TileKind.swamp, 1), 39, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.mine, 1), new Tile(TileKind.wheat, 0), 40, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.field, 2), 41, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.water, 0), new Tile(TileKind.field, 2), 42, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.swamp, 2), 43, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.field, 0), new Tile(TileKind.swamp, 2), 44, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.mine, 2), new Tile(TileKind.wheat, 0), 45, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.swamp, 0), new Tile(TileKind.mine, 2), 46, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.swamp, 0), new Tile(TileKind.mine, 2), 47, DominoState.Uninitialized),
+        new Domino(new Tile(TileKind.wheat, 0), new Tile(TileKind.mine, 3), 48, DominoState.Uninitialized)
     ];
     return shuffle(dominos);
 }
@@ -152,3 +157,7 @@ export enum DominoStateAction {
 export function findDomino(dominos:Domino[], rank:number) {
     return dominos.find(d => d.rank === rank);
 } 
+
+export function ofState(dominos:Domino[], state:DominoState) {
+    return dominos.filter(d => d.state === state);
+}
