@@ -101,13 +101,12 @@ export const State_InitializeRound =         {
     }
 };
 
-export interface INextStates {
+interface INextStates {
     [key: string]: IGameState;
 }
 
 export function getNextState(current:GameStateName, data:IGameData):{state:GameStateName, data:IGameData} {
     const states:INextStates = {};
-
     states[GameStateName.InitializeGame] = State_InitializeGame;
     states[GameStateName.InitializeRound] = State_InitializeRound;
     
