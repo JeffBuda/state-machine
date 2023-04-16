@@ -26,6 +26,7 @@ describe('GameStateAction.Pick1_Player2', () => {
         expect(gameData.state).toBe(GameState.Pick1_Player2);
         expect(dominosOfState(gameData.dominos, DominoState.InPickList_Claimed).length).toBe(1);
         expect(dominosOfState(gameData.dominos, DominoState.InPickList_Available).length).toBe(3);
-
+        expect(dominosOfState(gameData.dominos, DominoState.InDrawPile).length).toBe(24-4);
+        expect(dominosOfState(gameData.dominos, DominoState.OutOfGame).length).toBe(24);
     })
 });
