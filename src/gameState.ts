@@ -41,12 +41,13 @@ export interface IGameData {
 }
 
 export interface IActionData {
-    player1: string;
-    player2: string;
+    player1?: string;
+    player2?: string;
+    player?:string;
     dominoRank?: number;
 }
 
-export function executeGameAction(action: GameStateAction, actionData: IActionData, data?: IGameData): IGameData {
+export function executeGameAction(action: GameStateAction, actionData: IActionData, gameData?: IGameData): IGameData {
 
     if (action === GameStateAction.Initialize) {
         if(!actionData.player1 || !actionData.player2)
@@ -77,14 +78,14 @@ export function executeGameAction(action: GameStateAction, actionData: IActionDa
         return newData;
     }
 
-    if (!data)
+    if (!gameData)
         throw new Error(`Command ${action} requires data.`);
 
-    switch (data.state) {
+    switch (gameData.state) {
         case GameState.Pick1_Player1:
             if (action === GameStateAction.Pick_Player1) {
                 const newData = {
-                    ...data,
+                    ...gameData,
                     state: GameState.Pick1_Player2,
                 }
                 const picked = findDomino(newData.dominos, actionData!.dominoRank!);
