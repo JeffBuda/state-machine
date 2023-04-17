@@ -4,22 +4,22 @@ export enum DominoState {
     Uninitialized = "Uninitialized",
 
     /** No available for play, ie two player game */
-    OutOfGame = "NotInGame",
+    OutOfGame = "OutOfGame",
 
     /** Not revealed but will be eventually */
     InDrawPile = "InDrawPile",
 
     /** Revealed, in the current round, not yet claimed by any Player*/
-    InPickList_Available = "InCurrentRoundAvailable",
+    InPickList_Available = "InPickList_Available",
 
     /** Revealed, in current round, and claimed by a Player */
-    InPickList_Claimed = "Claimed By Player",
+    InPickList_Claimed = "InPickList_Claimed",
 
     /** In the list if dominos to be placed by Players in this round */
-    InPlacementList = "In Placement List",
+    InPlacementList = "InPlacementList",
 
     /** Placed by a player in their kingdom */
-    InKingdom = "In Kingdom",
+    InKingdom = "InKingdom",
 }
 
 

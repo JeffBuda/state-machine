@@ -14,7 +14,7 @@ replServer.defineCommand('greet', {
   },
 });
 
-replServer.defineCommand('game-init', {
+replServer.defineCommand('gameInit', {
     help: 'Start new Domino game',
     action(text) {
         const p1 = text.split(' ')[0];
@@ -25,7 +25,17 @@ replServer.defineCommand('game-init', {
     }
 });
 
-replServer.defineCommand('game-show-dominos', {
+replServer.defineCommand('gameListDominoStates', {
+    help: 'Shows all domino states',
+    action(text) {
+        for(const ds in DominoState)
+            console.log(ds);
+        this.displayPrompt();
+    }
+});
+
+
+replServer.defineCommand('gameShowDominos', {
     help: 'Shows all dominos of a given state',
     action(text) {
         const dominos = dominosOfState((replServer.context.gameState as IGameData).dominos, text as DominoState);
