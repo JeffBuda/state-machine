@@ -1,9 +1,8 @@
 import * as repl from 'repl';
-import { GameState, GameStateAction, executeGameAction } from './gameState';
+import { GameState, GameStateAction, IGameData, executeGameAction } from './gameState';
+import { DominoState, dominosOfState } from './domino';
 
 const prompt = '> ';
-
-let gameState = executeGameAction(GameStateAction.Initialize, {player1:'1', player2:'2'});
 
 const replServer = repl.start({ prompt });
 
@@ -22,6 +21,15 @@ replServer.defineCommand('game-init', {
         const p2 = text.split(' ')[1];
         replServer.context.gameState = executeGameAction(GameStateAction.Initialize, {player1:p1, player2: p2});
         console.log(`Started game for ${replServer.context.gameState.player1} and ${replServer.context.gameState.player2}`);
+        this.displayPrompt();
+    }
+});
+
+replServer.defineCommand('game-show-dominos', {
+    help: 'Shows all dominos of a given state',
+    action(text) {
+        const dominos = dominosOfState((replServer.context.gameState as IGameData).dominos, text as DominoState);
+        dominos.forEach(d => console.log(d.toString()));
         this.displayPrompt();
     }
 });

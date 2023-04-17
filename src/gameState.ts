@@ -3,24 +3,24 @@ import { Domino, DominoState, DominoStateAction, findDomino, getDominos, getNext
 
 export enum GameState {
 
-    Initialized,
+    Initialized = "Initialized",
 
-    Place1_Player1,
-    Pick1_Player1,
+    Place1_Player1 = "Waiting for Player 1 to Place First Domino",
+    Pick1_Player1 = "Waiting for Player 1 to Pick First Domino",
 
-    Place1_Player2,
-    Pick1_Player2,
+    Place1_Player2 = "Waiting for Player 2 to Place First Domino",
+    Pick1_Player2 = "Waiting for Player 2 to pick first domino",
 
-    Place2_Player1,
-    Pick2_Player1,
+    Place2_Player1 = "Waiting for Player 1 to place second domino",
+    Pick2_Player1 = "Waiting for Player 1 to pick second domino",
 
-    Place2_Player2,
-    Pick2_Player2,
+    Place2_Player2 = "Waiting for Player 2 to place second domino",
+    Pick2_Player2 = "Waiting for Player 2 to pick second domino",
 
     // If Dominos in Deck, Go To InitializeRound
 
     // determine winner
-    EndGame,
+    EndGame = "Game over.",
 }
 
 export enum GameStateAction {
