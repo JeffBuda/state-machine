@@ -1,18 +1,10 @@
 import * as repl from 'repl';
 import { GameState, GameStateAction, IGameData, executeGameAction } from './gameState';
-import { DominoState, dominosOfState } from './domino';
+import { DominoState, dominosOfState, sortByRank } from './domino';
 
 const prompt = '> ';
 
 const replServer = repl.start({ prompt });
-
-replServer.defineCommand('greet', {
-  help: 'Greet someone',
-  action(name) {
-    console.log(`Hello, ${name}!`);
-    this.displayPrompt();
-  },
-});
 
 replServer.defineCommand('gameInit', {
     help: 'Start new Domino game',
@@ -35,27 +27,14 @@ replServer.defineCommand('gameListDominoStates', {
 });
 
 
-replServer.defineCommand('gameShowDominos', {
+replServer.defineCommand('gameListDominos', {
     help: 'Shows all dominos of a given state',
     action(text) {
         const dominos = dominosOfState((replServer.context.gameState as IGameData).dominos, text as DominoState);
-        dominos.forEach(d => console.log(d.toString()));
+        dominos.sort(sortByRank).forEach(d => console.log(d.toString()));
         this.displayPrompt();
     }
 });
-
-replServer.defineCommand('sum', {
-    help: 'Calculate the sum of two numbers',
-    action(args: string) {
-        console.log(args);
-        
-      const a = parseInt(args.split(' ')[0], 10);
-      const b = parseInt(args.split(' ')[1], 10);
-      const sum = a + b;
-      console.log(`The sum of ${a} and ${b} is ${sum}`);
-      this.displayPrompt();
-    },
-  });
 
 replServer.defineCommand('exit', {
   help: 'Exit the REPL',
