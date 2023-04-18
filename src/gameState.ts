@@ -5,29 +5,29 @@ export enum GameState {
 
     Initialized = "Initialized",
 
-    Place1_Player1 = "Waiting for Player 1 to Place First Domino",
-    Pick1_Player1 = "Waiting for Player 1 to Pick First Domino",
+    Claim1_Player1 = "Claim1_Player1",
+    Place1_Player1 = "Place1_Player1",
 
-    Place1_Player2 = "Waiting for Player 2 to Place First Domino",
-    Pick1_Player2 = "Waiting for Player 2 to pick first domino",
+    Claim1_Player2 = "Claim1_Player2",
+    Place1_Player2 = "Place1_Player2",
 
-    Place2_Player1 = "Waiting for Player 1 to place second domino",
-    Pick2_Player1 = "Waiting for Player 1 to pick second domino",
+    Place2_Player1 = "Place2_Player1",
+    Claim2_Player1 = "Claim2_Player1",
 
-    Place2_Player2 = "Waiting for Player 2 to place second domino",
-    Pick2_Player2 = "Waiting for Player 2 to pick second domino",
+    Place2_Player2 = "Place2_Player2",
+    Claim2_Player2 = "Claim2_Player2",
 
     // If Dominos in Deck, Go To InitializeRound
 
     // determine winner
-    EndGame = "Game over.",
+    GameOver = "GameOver",
 }
 
 export enum GameStateAction {
     Initialize,
 
-    Pick_Player1,
-    Pick_Player2,
+    Claim_Player1,
+    Claim_Player2,
 
     Place_Player1,
     Place_Player2,
@@ -57,7 +57,7 @@ export function executeGameAction(action: GameStateAction, actionData: IActionDa
             player1: actionData.player1,
             player2: actionData.player2,
             dominos: getDominos(),
-            state: GameState.Pick1_Player1,
+            state: GameState.Claim1_Player1,
         };
 
         // move 24 dominos out of game
@@ -82,14 +82,15 @@ export function executeGameAction(action: GameStateAction, actionData: IActionDa
         throw new Error(`Command ${action} requires data.`);
 
     switch (gameData.state) {
-        case GameState.Pick1_Player1:
-            if (action === GameStateAction.Pick_Player1) {
+        case GameState.Claim1_Player1:
+            if (action === GameStateAction.Claim_Player1) {
                 const newData = {
                     ...gameData,
-                    state: GameState.Pick1_Player2,
+                    state: GameState.Claim1_Player2,
                 }
                 const picked = findDomino(newData.dominos, actionData!.dominoRank!);
                 picked!.state = setDominoState(picked!.state!, DominoStateAction.ClaimByPlayer);
+                picked!.pickedBy = actionData.player;
                 return newData;
             }
             throw new Error(`Waiting on Player 1 to Pick.`);

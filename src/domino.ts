@@ -63,10 +63,10 @@ export class Domino {
         public readonly tileB: Tile,
         public readonly rank: number,
         public state: DominoState,
-        public stateDetail?: string) {
+        public pickedBy?: string) {
     }
     public toString(): string {
-        return `Domino ${this.rank} with ${this.tileA} and ${this.tileB} (${this.state} ${this.stateDetail})`;
+        return `Domino ${this.rank} with ${this.tileA} and ${this.tileB} (${this.state} ${this.pickedBy})`;
     }
 }
 
