@@ -19,7 +19,7 @@ describe('GameStateAction.Claim_Player1', () => {
         gameData = executeGameAction(GameStateAction.Claim_Player1,
             {
                 //pick the first domino in the pick list
-                dominoRank: dominosOfState(gameData.dominos, DominoState.InPickList_Available)[0].rank,
+                dominoId: dominosOfState(gameData.dominos, DominoState.InPickList_Available)[0].rank,
             },
             gameData);
 

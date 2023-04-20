@@ -59,7 +59,7 @@ replServer.defineCommand('gameClaim', {
 
         replServer.context.gameData = executeGameAction(
             GameStateAction.Claim_Player1,
-            {player: playerNumber, dominoRank: parseInt(dominoRank)},
+            {player: playerNumber, dominoId: parseInt(dominoRank)},
             replServer.context.gameData as IGameData);
         
             const dominos = dominosOfState((replServer.context.gameData as IGameData).dominos, text as DominoState);
