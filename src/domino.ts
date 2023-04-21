@@ -63,7 +63,7 @@ export class Domino {
         public readonly tileB: Tile,
         public readonly rank: number,
         public state: DominoState,
-        public pickedBy?: number) {
+        public pickedBy?: string) {
     }
     public toString(): string {
         return `Domino ${this.rank} with ${this.tileA} and ${this.tileB} (${this.state} ${this.pickedBy})`;
@@ -90,6 +90,26 @@ function shuffle<T>(a: Array<T>): Array<T> {
         [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+}
+
+export function initializeDominos() {
+    const dominos = getDominos();
+    // move 24 dominos out of game
+    dominosOfState(dominos, DominoState.Uninitialized)
+        .slice(0, 24)
+        .forEach(d => d.state = getNextDominoState(d.state, DominoStateAction.PlaceOutOfGame));
+
+    // move 24 dominos in draw pile
+    dominosOfState(dominos, DominoState.Uninitialized)
+        .slice(0, 24)
+        .forEach(d => d.state = getNextDominoState(d.state, DominoStateAction.PlaceInDrawPile));
+
+    // move four dominos into the Pick List
+    dominosOfState(dominos, DominoState.InDrawPile)
+        .slice(0, 4)
+        .forEach(d => d.state = getNextDominoState(d.state, DominoStateAction.PlaceInPickList));
+
+    return dominos;
 }
 
 export function getDominos() {
