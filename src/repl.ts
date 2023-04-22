@@ -6,9 +6,18 @@ import { IPlayerManager, PMContext, PMEvent, PlayerManagerType, createPlayerMana
 const prompt = '> ';
 
 const replServer = repl.start({ prompt });
-replServer.context.playerManager = createPlayerManager(); 
-
 const pm = (rs:repl.REPLServer):PlayerManagerType => rs.context.playerManager;
+replServer.context.playerManager = createPlayerManager(); 
+pm(replServer).onTransition((state, event)=>{
+    console.log(state);
+    console.log(event);
+    // console.log(`Transition: ${event.type} ${event}`);
+    // if (event.error) {
+    //     console.log(`Transition failed with error: ${event.error}`);
+    //   } else {
+    //     console.log(`Transition was successful`);
+    //   }
+});
 
 replServer.defineCommand('gameClaim', {
     help: 'Claim a Domino for a Player (playerName dominoId)',

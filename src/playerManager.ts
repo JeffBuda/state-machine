@@ -56,7 +56,7 @@ export type PlayerManagerType = Interpreter<PMContext, any, AnyEventObject, {
 }, ResolveTypegenMeta<TypegenDisabled, AnyEventObject, BaseActionObject, ServiceMap>>;
 
 
-export type PlayerClaimsDominoEvent = { type: PMEvent.playerClaimsDomino, player: string, dominoId: number }
+export type DominoEvent = { type: PMEvent.playerClaimsDomino, player: string, dominoId: number }
 
 export function createPlayerManager() {
 
@@ -98,7 +98,7 @@ export function createPlayerManager() {
                                 PMGuards.isInitialClaimRound),
                             target: PMState.claim,
                             actions:
-                                assign((context, event: PlayerClaimsDominoEvent) => {
+                                assign((context, event: DominoEvent) => {
 
                                     // update the player sequence to indicate this player has taken his turn
                                     const newSequence = [...context.playerClaimSequence];
@@ -136,7 +136,8 @@ export function createPlayerManager() {
                     return context.playerClaimSequence.length === 0;
                 },
                 [PMGuards.isEventDominoAvailable]: (context, event) => {
-                    return findDomino(context.dominos, event.domino)?.state === DominoState.InPickList_Available;
+                    const dominoEvent = event as DominoEvent;
+                    return findDomino(context.dominos, dominoEvent.dominoId)?.state === DominoState.InPickList_Available;
                 },
                 [PMGuards.isInitialClaimRound]: (context, event) => {
                     return context.isInitialClaimRound;
@@ -154,5 +155,5 @@ export function createPlayerManager() {
 export function getPMContext(playerManager: PlayerManagerType) { return playerManager.machine.context };
 
 export interface IPlayerManager {
-    execute(event: PlayerClaimsDominoEvent): void;
+    execute(event: DominoEvent): void;
 }
