@@ -34,11 +34,13 @@ export enum PMEvent {
     playerClaimsDomino = 'playerClaimsDomino'
 }
 
+
 export enum PMGuards {
     isEventPlayersTurn = 'isPlayersTurn',
     allPlayersHaveClaimed = 'allPlayersHaveClaimed',
     isEventDominoAvailable = "dominoIsAvailable",
-    isInitialClaimRound = "isInitialClaimRound"
+    isInitialClaimRound = "isInitialClaimRound",
+    isLastPlayerInSequence = "isLastPlayerInSequence"
 }
 
 export interface PMContext {
@@ -83,10 +85,16 @@ export function createPlayerManager() {
                                 PMGuards.isEventPlayersTurn,
                                 PMGuards.isEventDominoAvailable,
                                 PMGuards.isInitialClaimRound,
-                                PMGuards.allPlayersHaveClaimed),
+                                PMGuards.isLastPlayerInSequence),
                             target: PMState.place,
-                            actions:
-                                assign(context => { return { isInitialClaimRound: false } })
+                            actions:[
+                                assign(context => { return { isInitialClaimRound: false } }),
+                                assign((context, event: DominoEvent) => {
+
+                                    // update the player sequence to indicate this player has taken his turn
+                                    return updateContextForClaimedDomino(context, event);
+                                })
+                            ]
 
                         },
                         {
@@ -101,17 +109,7 @@ export function createPlayerManager() {
                                 assign((context, event: DominoEvent) => {
 
                                     // update the player sequence to indicate this player has taken his turn
-                                    const newSequence = [...context.playerClaimSequence];
-                                    newSequence.shift();
-
-                                    // update the domino to indicate that he claimed it
-                                    const newDominos = [...context.dominos];
-                                    findDomino(newDominos, event.dominoId)!.pickedBy = event.player;
-
-                                    return {
-                                        playerClaimSequence: newSequence,
-                                        currentPlayer: newSequence[0]
-                                    };
+                                    return updateContextForClaimedDomino(context, event);
                                 })
                         }
                     ],
@@ -130,10 +128,13 @@ export function createPlayerManager() {
             },
             guards: {
                 [PMGuards.isEventPlayersTurn]: (context, event) => {
-                    return context.currentPlayer === event.player;
+                    const dominoEvent = event as DominoEvent;
+                    return context.currentPlayer === dominoEvent.player;
                 },
-                [PMGuards.allPlayersHaveClaimed]: (context, _) => {
-                    return context.playerClaimSequence.length === 0;
+                [PMGuards.isLastPlayerInSequence]: (context, event) => {
+                    const dominoEvent = event as DominoEvent;
+                    return context.playerClaimSequence.length === 1 && 
+                    context.playerClaimSequence[0] === dominoEvent.player;
                 },
                 [PMGuards.isEventDominoAvailable]: (context, event) => {
                     const dominoEvent = event as DominoEvent;
@@ -150,6 +151,20 @@ export function createPlayerManager() {
     const instance = interpret(machine);
     instance.start();
     return instance;
+}
+
+function updateContextForClaimedDomino(context: PMContext, event: DominoEvent) {
+    const newSequence = [...context.playerClaimSequence];
+    newSequence.shift();
+
+    // update the domino to indicate that he claimed it
+    const newDominos = [...context.dominos];
+    findDomino(newDominos, event.dominoId)!.pickedBy = event.player;
+
+    return {
+        playerClaimSequence: newSequence,
+        currentPlayer: newSequence[0]
+    };
 }
 
 export function getPMContext(playerManager: PlayerManagerType) { return playerManager.machine.context };

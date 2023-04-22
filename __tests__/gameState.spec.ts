@@ -26,12 +26,14 @@ describe('PlayerManager', () => {
         expect(current.value).toBe(PMState.claim);
         expect(current.context.currentPlayer).toBe('jeff');
 
-        const dominos = dominosOfState(current.context.dominos, DominoState.InPickList_Available);
+        var dominos = dominosOfState(current.context.dominos, DominoState.InPickList_Available);
         pm.send({ type: PMEvent.playerClaimsDomino, player: 'jeff', dominoId: dominos[0].rank });
 
+        dominos = dominosOfState(current.context.dominos, DominoState.InPickList_Available);
+        pm.send({ type: PMEvent.playerClaimsDomino, player: 'dave', dominoId: dominos[0].rank });
+
         current = pm.getSnapshot();
-        expect(current.value).toBe(PMState.claim);
-        expect(current.context.currentPlayer).toBe('dave');
+        expect(current.value).toBe(PMState.place);
     });
 
 });
