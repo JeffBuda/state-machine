@@ -1,4 +1,4 @@
-import { Domino, DominoState, DominoStateAction, findDomino, getDominos, getNextDominoState as setDominoState, dominosOfState as dominosOfState, initializeDominos } from "./domino";
+import { Domino, DominoState, findDomino, getNextDominoState as setDominoState, dominosOfState as getDominosByState, initializeDominos } from "./domino";
 import { createMachine, assign, interpret } from 'xstate';
 import { AnyEventObject, BaseActionObject, Interpreter, ResolveTypegenMeta, ServiceMap, TypegenDisabled } from 'xstate';
 
@@ -26,12 +26,18 @@ export enum PMState {
     gameOver = 'gameOver'
 };
 
+
 export enum PMAction {
-    playerClaimsDomino = 'playerClaimsDomino'
+    updatePlayerSequence = 'updatePlayerSequence',
+    updatePlayerOrderForNewRound = "updatePlayerOrderForNewRound",
+    updateCurrentPlayer = "updateCurrentPlayer",
+    updateClaimedDomino = "updateClaimedDomino",
+    updateInitialClaimRound = "updateInitialClaimRound"
 }
 
 export enum PMEvent {
-    playerClaimsDomino = 'playerClaimsDomino'
+    playerClaimsDomino = 'playerClaimsDomino',
+    playerPlacesDomino = 'playerPlacesDomino'
 }
 
 
@@ -46,7 +52,7 @@ export enum PMGuards {
 export interface PMContext {
     players: string[];
     currentPlayer: string;
-    playerClaimSequence: string[];
+    playerTurnOrder: string[];
     dominos: Domino[];
     isInitialClaimRound: boolean;
 }
@@ -71,15 +77,15 @@ export function createPlayerManager() {
         context: {
             players: ['jeff', 'dave'],
             currentPlayer: 'jeff',
-            playerClaimSequence: ['jeff', 'dave'],
+            playerTurnOrder: ['jeff', 'dave'],
             dominos: initializeDominos(),
             isInitialClaimRound: true
-        },
+        } as PMContext,
 
         states: {
             [PMState.claim]: {
                 on: {
-                    [PMAction.playerClaimsDomino]: [
+                    [PMEvent.playerClaimsDomino]: [
                         {
                             cond: guards.every(
                                 PMGuards.isEventPlayersTurn,
@@ -87,41 +93,72 @@ export function createPlayerManager() {
                                 PMGuards.isInitialClaimRound,
                                 PMGuards.isLastPlayerInSequence),
                             target: PMState.place,
-                            actions:[
-                                assign(context => { return { isInitialClaimRound: false } }),
-                                assign((context, event: DominoEvent) => {
-
-                                    // update the player sequence to indicate this player has taken his turn
-                                    return updateContextForClaimedDomino(context, event);
-                                })
+                            actions: [
+                                PMAction.updateClaimedDomino,
+                                PMAction.updatePlayerOrderForNewRound,
+                                PMAction.updateCurrentPlayer                            
+                            ]                                
+                        },
+                        {
+                            cond: guards.every(
+                                PMGuards.isEventPlayersTurn,
+                                PMGuards.isEventDominoAvailable),
+                            target: PMState.claim,
+                            actions: [
+                                PMAction.updateClaimedDomino,
+                                PMAction.updatePlayerSequence,
+                                PMAction.updateCurrentPlayer,
+                                PMAction.updateInitialClaimRound
                             ]
 
                         },
-                        {
-                            // in the initial claim round allow a player to claim a token
-                            // then move onto the next player in the player sequence
-                            cond: guards.every(
-                                PMGuards.isEventPlayersTurn,
-                                PMGuards.isEventDominoAvailable,
-                                PMGuards.isInitialClaimRound),
-                            target: PMState.claim,
-                            actions:
-                                assign((context, event: DominoEvent) => {
-
-                                    // update the player sequence to indicate this player has taken his turn
-                                    return updateContextForClaimedDomino(context, event);
-                                })
-                        }
                     ],
                 }
             },
-            [PMState.place]: {},
+            [PMState.place]: {
+                on: {
+                    [PMEvent.playerPlacesDomino]: [
+                    {
+                        cond: guards.every(
+                            PMGuards.isEventPlayersTurn,
+                            PMGuards.isEventDominoCurrentDomino,
+                            PMGuards.isLastClaimedDomino
+                        ),
+                        target: PMState.claim,
+                        actions:[]
+                    }
+                ],
+            },
             [PMState.gameOver]: {}
         }
     },
         {
             actions: {
-
+                [PMAction.updateClaimedDomino]: (context, event:DominoEvent) => {
+                    const newDominos = calcDominoClaim(context.dominos, event.player, event.dominoId);
+                    assign({dominos: newDominos} as PMContext);
+                },
+                [PMAction.updateCurrentPlayer]: (context, event) => {
+                    assign({ 
+                        currentPlayer: context.playerTurnOrder[0] 
+                    } as PMContext);
+                },
+                [PMAction.updatePlayerSequence]: (context, event) => {
+                    // remove current player from the turn order
+                    const newPlayerTurnOrder = [...context.playerTurnOrder];
+                    newPlayerTurnOrder.shift(); 
+                    assign({
+                        playerTurnOrder: newPlayerTurnOrder
+                    } as PMContext);
+                },
+                [PMAction.updatePlayerOrderForNewRound]: (context, event) => {
+                    assign({
+                        playerTurnOrder: calcPlayerTurnOrder(context.dominos)
+                    } as PMContext);
+                },
+                [PMAction.updateInitialClaimRound]: (context, event) =>{
+                    assign({isInitialClaimRound: false} as PMContext);
+                },
             },
             delays: {
                 /* ... */
@@ -133,8 +170,8 @@ export function createPlayerManager() {
                 },
                 [PMGuards.isLastPlayerInSequence]: (context, event) => {
                     const dominoEvent = event as DominoEvent;
-                    return context.playerClaimSequence.length === 1 && 
-                    context.playerClaimSequence[0] === dominoEvent.player;
+                    return context.playerTurnOrder.length === 1 &&
+                        context.playerTurnOrder[0] === dominoEvent.player;
                 },
                 [PMGuards.isEventDominoAvailable]: (context, event) => {
                     const dominoEvent = event as DominoEvent;
@@ -153,18 +190,20 @@ export function createPlayerManager() {
     return instance;
 }
 
-function updateContextForClaimedDomino(context: PMContext, event: DominoEvent) {
-    const newSequence = [...context.playerClaimSequence];
-    newSequence.shift();
-
+function calcDominoClaim(dominos:Domino[], playerName:string, dominoId:number) {
     // update the domino to indicate that he claimed it
-    const newDominos = [...context.dominos];
-    findDomino(newDominos, event.dominoId)!.pickedBy = event.player;
+    const newDominos = [...dominos];
+    findDomino(newDominos, dominoId)!.pickedBy = playerName;
+    return newDominos;
+}
 
-    return {
-        playerClaimSequence: newSequence,
-        currentPlayer: newSequence[0]
-    };
+function calcPlayerTurnOrder(dominos: Domino[]): string[] {
+    const claimed = getDominosByState(dominos, DominoState.InPickList_Claimed);
+    claimed.sort((a, b) => {
+        if (a.rank === b.rank) return 0;
+        return a.rank > b.rank ? -1 : 1;
+    });
+    return claimed.map(d => d.pickedBy!);
 }
 
 export function getPMContext(playerManager: PlayerManagerType) { return playerManager.machine.context };
