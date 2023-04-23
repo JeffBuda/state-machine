@@ -1,31 +1,32 @@
 import { update } from "xstate/lib/actionTypes";
 import { Domino, DominoState, calcDominoClaimed, calcDominoPlaced, getDominosByState, initializeDominos } from "./domino";
 
-enum PlayKind {
+export enum PlayKind {
     ClaimDomino = "ClaimDomino",
     PlaceDomino = "PlaceDomino",
     Pass = "Pass",
     CalculateNextRound = "CalculateNextRound"
 }
 
-interface IStep {
+export interface IStep {
     playerName?: string;
     readonly playKind: PlayKind;
 }
 
-interface ICommand {
+export interface ICommand {
     readonly playerName: string;
     readonly playKind: PlayKind;
     readonly dominoId: number;
 }
 
-interface ICommandResult {
+export interface ICommandResult {
     readonly command: ICommand;
     readonly success: boolean;
     readonly state: IState;
+    readonly message: string;
 }
 
-interface IState {
+export interface IState {
     readonly dominos: Domino[];
     readonly steps: IStep[];
 }
@@ -61,7 +62,7 @@ export function processCommand(state: IState, command: ICommand): ICommandResult
 
     if (command.playKind !== currentStep.playKind ||
         command.playerName !== currentStep.playerName) {
-        return { success: false, command: command, state: state };
+        return { success: false, command: command, state: state, message: 'Invalid Play or Player' };
     }
 
     const updatedState = {
@@ -75,6 +76,9 @@ export function processCommand(state: IState, command: ICommand): ICommandResult
         updatedState.steps.shift();
 
         // mark domino as claimed
+        if(!getDominosByState(state.dominos, DominoState.InPickList_Available).find(d => d.rank === command.dominoId)) {
+            return {command, state, success: false, message: 'Domino not available'};
+        }
         updatedState.dominos = calcDominoClaimed(updatedState.dominos, command.playerName, command.dominoId);
 
         if (updatedState.steps[0].playKind === PlayKind.CalculateNextRound) {
@@ -97,7 +101,7 @@ export function processCommand(state: IState, command: ICommand): ICommandResult
         updatedState.dominos = calcDominoPlaced(updatedState.dominos, command.playerName, command.dominoId);
     }
 
-    return { success: true, command: command, state: updatedState };
+    return { success: true, command: command, state: updatedState, message: 'Success' };
 }
 
 function calcPlayerTurnOrder(dominos: Domino[]): string[] {
