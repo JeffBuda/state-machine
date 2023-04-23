@@ -1,4 +1,4 @@
-import { Domino, DominoState, findDomino, getNextDominoState as setDominoState, dominosOfState as getDominosByState, initializeDominos } from "./domino";
+import { Domino, DominoState, findDomino, getNextDominoState as setDominoState, getDominosByState as getDominosByState, initializeDominos } from "./domino";
 import { createMachine, assign, interpret } from 'xstate';
 import { AnyEventObject, BaseActionObject, Interpreter, ResolveTypegenMeta, ServiceMap, TypegenDisabled } from 'xstate';
 
@@ -190,12 +190,7 @@ export function createPlayerManager() {
     return instance;
 }
 
-function calcDominoClaim(dominos:Domino[], playerName:string, dominoId:number) {
-    // update the domino to indicate that he claimed it
-    const newDominos = [...dominos];
-    findDomino(newDominos, dominoId)!.pickedBy = playerName;
-    return newDominos;
-}
+
 
 function calcPlayerTurnOrder(dominos: Domino[]): string[] {
     const claimed = getDominosByState(dominos, DominoState.InPickList_Claimed);

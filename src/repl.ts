@@ -1,5 +1,5 @@
 import * as repl from 'repl';
-import { DominoState, dominosOfState, sortByRank } from './domino';
+import { DominoState, getDominosByState, sortByRank } from './domino';
 import { IPlayerManager, PMContext, PMEvent, PlayerManagerType, createPlayerManager, getPMContext } from './playerManager';
 
 
@@ -41,7 +41,7 @@ replServer.defineCommand('gameListDominoStates', {
 replServer.defineCommand('gameListDominos', {
     help: 'Shows all dominos of a given state',
     action(text) {
-        const dominos = dominosOfState((getPMContext(pm(replServer))).dominos, text as DominoState);
+        const dominos = getDominosByState((getPMContext(pm(replServer))).dominos, text as DominoState);
         dominos.sort(sortByRank).forEach(d => console.log(d.toString()));
         this.displayPrompt();
     }

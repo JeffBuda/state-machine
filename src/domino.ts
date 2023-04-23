@@ -23,7 +23,7 @@ export enum DominoState {
 }
 
 
-export function getNextDominoState(state: DominoState, action: DominoStateAction) {
+export function setDominoState(state: DominoState, action: DominoStateAction) {
     switch (state) {
 
         case DominoState.Uninitialized:
@@ -95,19 +95,19 @@ function shuffle<T>(a: Array<T>): Array<T> {
 export function initializeDominos() {
     const dominos = getDominos();
     // move 24 dominos out of game
-    dominosOfState(dominos, DominoState.Uninitialized)
+    getDominosByState(dominos, DominoState.Uninitialized)
         .slice(0, 24)
-        .forEach(d => d.state = getNextDominoState(d.state, DominoStateAction.PlaceOutOfGame));
+        .forEach(d => d.state = setDominoState(d.state, DominoStateAction.PlaceOutOfGame));
 
     // move 24 dominos in draw pile
-    dominosOfState(dominos, DominoState.Uninitialized)
+    getDominosByState(dominos, DominoState.Uninitialized)
         .slice(0, 24)
-        .forEach(d => d.state = getNextDominoState(d.state, DominoStateAction.PlaceInDrawPile));
+        .forEach(d => d.state = setDominoState(d.state, DominoStateAction.PlaceInDrawPile));
 
     // move four dominos into the Pick List
-    dominosOfState(dominos, DominoState.InDrawPile)
+    getDominosByState(dominos, DominoState.InDrawPile)
         .slice(0, 4)
-        .forEach(d => d.state = getNextDominoState(d.state, DominoStateAction.PlaceInPickList));
+        .forEach(d => d.state = setDominoState(d.state, DominoStateAction.PlaceInPickList));
 
     return dominos;
 }
@@ -178,6 +178,24 @@ export function findDomino(dominos:Domino[], rank:number) {
     return dominos.find(d => d.rank === rank);
 } 
 
-export function dominosOfState(dominos:Domino[], state:DominoState) {
+export function getDominosByState(dominos:Domino[], state:DominoState) {
     return dominos.filter(d => d.state === state);
+}
+
+export function calcDominoClaimed(dominos:Domino[], playerName:string, dominoId:number) {
+    // update the domino to indicate that he claimed it
+    const newDominos = [...dominos];
+    const domino = findDomino(newDominos, dominoId)!;
+    domino.pickedBy = playerName;
+    domino.state = setDominoState(domino.state, DominoStateAction.ClaimByPlayer);
+    return newDominos;
+}
+
+export function calcDominoPlaced(dominos:Domino[], playerName:string, dominoId:number) {
+    // update the domino to indicate that he claimed it
+    const newDominos = [...dominos];
+    const domino = findDomino(newDominos, dominoId)!;
+    domino.pickedBy = playerName;
+    domino.state = setDominoState(domino.state, DominoStateAction.PlaceInKingdom);
+    return newDominos;
 }
