@@ -8,20 +8,20 @@ export enum TileKind {
     mine = "mine"
 }
 
-export class Tile {
-    constructor(public readonly kind: TileKind, public readonly crowns: number) {
-        this.kind = kind;
-        this.crowns = crowns;
-    }
-    public toString(): string {
-        return `${this.kind} (${this.crowns} crowns)`;
-    }
+export interface ITile {
+    readonly kind:TileKind;
+    readonly crowns:number;
 }
 
-export class TileLocation {
-    constructor(public readonly x: number, public readonly y: number) {
-    }
-    public toString(): string {
-        return `${this.x}, ${this.y}`;
-    }
+export function tileToString(tile:ITile): string {
+    return `${tile.kind} (${tile.crowns} crowns)`;
+}
+
+export interface ITileLocation {
+    readonly x:number;
+    readonly y:number;
+}
+
+export function tileLocationToString(location:ITileLocation): string {
+    return `${location.x}, ${location.y}`;
 }

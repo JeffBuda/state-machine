@@ -1,5 +1,5 @@
 import { update } from "xstate/lib/actionTypes";
-import { Domino, DominoState, calcDominoClaimed, calcDominoPlaced, getDominosByState, initializeDominos } from "./domino";
+import { IDomino, DominoState, calcDominoClaimed, calcDominoPlaced, getDominosByState, initializeDominos } from "./domino";
 
 export enum PlayKind {
     ClaimDomino = "ClaimDomino",
