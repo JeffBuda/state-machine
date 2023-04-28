@@ -28,7 +28,7 @@ export interface ICommandResult {
 }
 
 export interface IState {
-    readonly dominos: Domino[];
+    readonly dominos: IDomino[];
     readonly steps: IStep[];
 }
 
@@ -104,7 +104,7 @@ export function processCommand(state: IState, command: ICommand): ICommandResult
     return { success: true, command: command, state: updatedState, message: 'Success' };
 }
 
-function calcPlayerOrderForNextRound(updatedState: { dominos: Domino[]; steps: IStep[]; }) {
+function calcPlayerOrderForNextRound(updatedState: { dominos: IDomino[]; steps: IStep[]; }) {
     if (updatedState.steps[0].playKind === PlayKind.CalculateNextRound) {
         // mark calc step as complete
         updatedState.steps.shift();
@@ -118,7 +118,7 @@ function calcPlayerOrderForNextRound(updatedState: { dominos: Domino[]; steps: I
     }
 }
 
-function getSortedClaimedDominos(dominos: Domino[]): Domino[] {
+function getSortedClaimedDominos(dominos: IDomino[]): IDomino[] {
     const claimed = getDominosByState(dominos, DominoState.InPickList_Claimed);
     claimed.sort((a, b) => {
         if (a.rank === b.rank) return 0;
