@@ -177,8 +177,6 @@ export function getDominos():IDomino[] {
     return shuffle(dominos);
 }
 
-
-
 export function findDomino(dominos:IDomino[], rank:number) {
     return dominos.find(d => d.rank === rank);
 } 
