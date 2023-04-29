@@ -204,6 +204,7 @@ export function getValidLocations(k:IKingdom, domino:IDomino): {vertical: IDomin
     const valid:{vertical: IDominoLocation[], horizontal: IDominoLocation[]} = {vertical:[], horizontal:[]}
 
     forEachVerticalDominoLocation((testLoc) => {
+        console.log('(', testLoc.locA.x, ', ', testLoc.locA.y, ') (', testLoc.locB.x, ', ', testLoc.locB.y, ')');
         if(locationAvailable(k, testLoc) && 
             verticalDominoMatches(k, domino, testLoc) &&
             kingdomWouldBeValidSize(k, testLoc)) {
