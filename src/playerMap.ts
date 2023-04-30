@@ -14,18 +14,18 @@ import { IDominoLocation, ITile, ITileLocation, TileKind } from "./tile";
  *  4                     .
  * 
 */
-export type IKingdom = ReadonlyArray<ReadonlyArray<ITile | undefined>>;
-type IEditableKingdom = Array<Array<ITile | undefined>>;
+export type IKingdom = ReadonlyMap<number, ReadonlyMap<number, ITile | undefined>>;
+type IEditableKingdom = Map<number, Map<number, ITile | undefined>>;
 
 export function getNewKingdom(): IKingdom {
-    const tiles: IEditableKingdom = [];
+    const tiles: IEditableKingdom = new Map();
     for (var x of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
-        tiles[x] = [];
+        tiles.set(x, new Map());
         for (var y of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
-            tiles[x][y] = undefined;
+            tiles.get(x)?.set(y, undefined);
         }
     }
-    tiles[0][0] = { kind: TileKind.castle, crowns: 0 };
+    tiles.get(0)!.set(0, { kind: TileKind.castle, crowns: 0 });
     return tiles;
 }
 
@@ -36,12 +36,12 @@ export function locationsEqual(first: IDominoLocation, second: IDominoLocation) 
         first.locB.y === second.locB.y;
 }
 
-export function getTileAt(k: IKingdom, loc: ITileLocation) {
-    return k?.[loc.x]?.[loc.y];
+export function getAt(k: IKingdom, loc: ITileLocation) {
+    return k?.get(loc.x)?.get(loc.y);
 }
 
 export function locationAvailable(k: IKingdom, loc: IDominoLocation): boolean {
-    return getTileAt(k, loc.locA) === undefined && getTileAt(k, loc.locB) === undefined;
+    return getAt(k, loc.locA) === undefined && getAt(k, loc.locB) === undefined;
 }
 
 /**       x  x  x  x x x x x x
@@ -104,7 +104,7 @@ export function kingdomWouldBeValidSize(k: IKingdom, testLoc: IDominoLocation): 
             if (testLoc.locB.y === y) {
                 rowCount++;
             }
-            if (!!getTileAt(k, { x, y })) {
+            if (!!getAt(k, { x, y })) {
                 columnCount++;
                 rowCount++;
                 if (columnCount > 5 || rowCount > 5) {
@@ -124,19 +124,19 @@ export function kingdomWouldBeValidSize(k: IKingdom, testLoc: IDominoLocation): 
  * y -2         
  */
 function getLeftTile(k: IKingdom, t: ITileLocation) {
-    return k?.[t.x - 1]?.[t.y];
+    return k?.get(t.x - 1)?.get(t.y);
 }
 
 function getRightTile(k: IKingdom, t: ITileLocation) {
-    return k?.[t.x + 1]?.[t.y];
+    return k?.get(t.x + 1)?.get(t.y);
 }
 
 function getUpTile(k: IKingdom, t: ITileLocation) {
-    return k?.[t.x]?.[t.y - 1];
+    return k?.get(t.x)?.get(t.y - 1);
 }
 
 function getDownTile(k: IKingdom, t: ITileLocation) {
-    return k?.[t.x]?.[t.y + 1];
+    return k?.get(t.x)?.get(t.y + 1);
 }
 
 function tilesMatch(a?: ITile, b?: ITile) {
@@ -225,10 +225,10 @@ export function isValidLocation(k: IKingdom, d: IDomino, testLoc: IDominoLocatio
 
 /** @returns a new Kingdom with the given Domino placed at the given Location if the Location is valid */
 export function placeDomino(k: IKingdom, d: IDomino, dLoc: IDominoLocation): IKingdom {
-    const updated:IEditableKingdom = [...k.map(a => [...a])];
+    const updated:IEditableKingdom = deepCloneKingdom(k);
     if (isValidLocation(k, d, dLoc)) {
-        updated[dLoc.locA.x][dLoc.locA.y] = d.tileA;
-        updated[dLoc.locB.x][dLoc.locB.y] = d.tileB;
+        updated.get(dLoc.locA.x)!.set(dLoc.locA.y, d.tileA);
+        updated.get(dLoc.locB.x)!.set(dLoc.locB.y, d.tileB);
     }
     return updated;
 }
@@ -244,7 +244,7 @@ export function kingdomToString(k: IKingdom) {
     for (let y = -4; y < 5; y++) {
         s += y >= 0 ? " " + y : y;
         for (let x = -4; x < 5; x++) {
-            const tile = k?.[x]?.[y];
+            const tile = getAt(k, {x, y});
             if (tile === undefined) {
                 s += " .";
             } else if (tile.kind === TileKind.castle) {
@@ -269,3 +269,18 @@ export function kingdomToString(k: IKingdom) {
     }
     return s;
 }
+
+function deepCloneKingdom<K, V>(map: ReadonlyMap<K, ReadonlyMap<K, V>>): Map<K, Map<K, V>> {
+    const clone = new Map<K, Map<K, V>>();
+    for (const [key, value] of map.entries()) {
+      const nestedClone = new Map<K, V>();
+      for (const [nestedKey, nestedValue] of value.entries()) {
+        nestedClone.set(nestedKey, nestedValue);
+      }
+      clone.set(key, nestedClone);
+    }
+    return clone;
+  }
+  
+  
+  

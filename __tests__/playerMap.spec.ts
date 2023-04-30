@@ -1,5 +1,5 @@
 import { getDominos } from '../src/domino';
-import { getNewKingdom, getTileAt, getValidLocations, isValidLocation, placeDomino } from '../src/playerMap';
+import { getNewKingdom, getAt, getValidLocations, isValidLocation, placeDomino } from '../src/playerMap';
 import { TileKind } from '../src/tile';
 
 describe('PlayerMap', () => {
@@ -22,7 +22,7 @@ describe('PlayerMap', () => {
         const locA = {x:-2, y:0};
         const locB = {x:-1, y:0};
         let u = placeDomino(k, d[0], {locA, locB});
-        expect(getTileAt(u, locA)).toBeTruthy();
-        expect(getTileAt(u, locB)).toBeTruthy();
+        expect(getAt(u, locA)).toBeTruthy();
+        expect(getAt(u, locB)).toBeTruthy();
     });
 });
