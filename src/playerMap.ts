@@ -233,8 +233,16 @@ export function placeDomino(k: IKingdom, d: IDomino, dLoc: IDominoLocation): IKi
     return updated;
 }
 
-export function kingdomToJSON(k: ReadonlyArray<ReadonlyArray<ITile>>) {
+export function kingdomToJSON(k: IKingdom) {
     return JSON.stringify(k);
+}
+
+export function locationsToString(dLocs:IDominoLocation[]) {
+    let s = "\n";
+    for(const loc of dLocs) {
+        s+= `(${loc.locA.x}, ${loc.locA.y}), (${loc.locB.x}, ${loc.locB.y})\n`;
+    }
+    return s;
 }
 
 export function kingdomToString(k: IKingdom) {

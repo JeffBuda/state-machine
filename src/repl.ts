@@ -1,6 +1,6 @@
 import * as repl from 'repl';
 import { DominoState, getDominos, getDominosByState, sortByRank, dominoToString, findDomino } from './domino';
-import { getNewKingdom, getValidLocations, isValidLocation, kingdomToJSON, kingdomToString, placeDomino } from './playerMap';
+import { getNewKingdom, getValidLocations, isValidLocation, kingdomToJSON, kingdomToString, locationsToString, placeDomino } from './playerMap';
 
 
 const prompt = '> ';
@@ -41,13 +41,14 @@ replServer.defineCommand('gameValidLocations',{
     action(text) {
         const args = text.split(' ');
         const rank = parseInt(args[0]);
-        console.log(
-            JSON.stringify(
-                getValidLocations(
-                    replServer.context.kingdom, 
-                    findDomino(replServer.context.dominos, rank)!),
-                    null,
-                    2));
+        const k = replServer.context.kingdom;
+        const d = findDomino(replServer.context.dominos, rank)!;
+        const locs = getValidLocations(k,d);
+        
+        console.log(locationsToString(locs.vertical));
+        console.log(locationsToString(locs.horizontal));
+        console.log(dominoToString(d));
+        
         this.displayPrompt();
     }
 });
@@ -71,7 +72,7 @@ replServer.defineCommand('gamePlace', {
             console.log('Invalid location.');
         } else {
             replServer.context.kingdom = placeDomino(k, d, dLoc);
-            console.log(kingdomToString(k));
+            console.log(kingdomToString(replServer.context.kingdom));
         }
 
         this.displayPrompt();
