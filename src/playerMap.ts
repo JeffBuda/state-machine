@@ -233,8 +233,8 @@ export function placeDomino(k: IKingdom, d: IDomino, dLoc: IDominoLocation): IKi
     return updated;
 }
 
-export function kingdomToJSON(k: IKingdom) {
-    return JSON.stringify(k);
+export function kingdomToJavaScript(k: IKingdom) {
+    return "not implemented";
 }
 
 export function locationsToString(dLocs:IDominoLocation[]) {
