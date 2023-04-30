@@ -28,12 +28,19 @@ export function getNewKingdom(): IKingdom {
     return tiles;
 }
 
+export function locationsEqual(first:IDominoLocation, second:IDominoLocation) {
+    return first.locA.x === second.locA.x && 
+    first.locA.y === second.locA.y &&
+    first.locB.x === second.locB.x &&
+    first.locB.y === second.locB.y;
+}
+
 export function getTileAt(k: IKingdom, loc: ITileLocation) {
     return k?.[loc.x]?.[loc.y];
 }
 
 export function locationAvailable(k: IKingdom, loc: IDominoLocation): boolean {
-    return getTileAt(k, loc.locA) == undefined && getTileAt(k, loc.locB) === undefined;
+    return getTileAt(k, loc.locA) === undefined && getTileAt(k, loc.locB) === undefined;
 }
 
 /**       x  x  x  x x x x x x
@@ -187,16 +194,11 @@ function horizontalDominoMatches(k: IKingdom, domino: IDomino, loc: IDominoLocat
     return false;
 }
 
-export function kingdomIsValidWidth(k: IKingdom) {
-
-}
-
 export function getValidLocations(k: IKingdom, domino: IDomino): { vertical: IDominoLocation[], horizontal: IDominoLocation[] } {
 
     const valid: { vertical: IDominoLocation[], horizontal: IDominoLocation[] } = { vertical: [], horizontal: [] }
 
     forEachVerticalDominoLocation((testLoc) => {
-       // console.log('(', testLoc.locA.x, ', ', testLoc.locA.y, ') (', testLoc.locB.x, ', ', testLoc.locB.y, ')');
         if (locationAvailable(k, testLoc) &&
             verticalDominoMatches(k, domino, testLoc) &&
             kingdomWouldBeValidSize(k, testLoc)) {
@@ -212,20 +214,10 @@ export function getValidLocations(k: IKingdom, domino: IDomino): { vertical: IDo
         }
     });
 
-    // for each of tileA, tileB
-
-    // if a tile exist at this location
-    //  return false;
-
-    // if this placement makes the kingdom wider than 5 tiles
-    //  return false;
-
-    // if this placement would make the kingdom taller than 5 tiles
-    //  return false;
-
-    // if tileA does not match an adjacent tile AND tileB does not match an adjacent tile
-    // return false; //exclude the other tile in the domino of course
-
     return valid;
 }
 
+export function isValidLocation(k:IKingdom, d:IDomino, testLoc:IDominoLocation) {
+    const valid = getValidLocations(k, d);
+    return undefined !== [...valid.horizontal, ...valid.vertical].find(c => locationsEqual(c, testLoc));
+}
