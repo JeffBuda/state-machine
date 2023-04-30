@@ -29,15 +29,15 @@ export function getNewKingdom(): IKingdom {
     return tiles;
 }
 
-export function tileLocationsEqual(first:ITileLocation, second:ITileLocation) {
+export function tileLocationsEqual(first: ITileLocation, second: ITileLocation) {
     return first.x === second.x && first.y === second.y;
 }
 
 export function dominoLocationsEqual(first: IDominoLocation, second: IDominoLocation) {
-        return (
-            (tileLocationsEqual(first.locA, second.locA) && tileLocationsEqual(first.locB, second.locB))
-            || (tileLocationsEqual(first.locA, second.locB) && tileLocationsEqual(first.locB, second.locA))
-        );
+    return (
+        (tileLocationsEqual(first.locA, second.locA) && tileLocationsEqual(first.locB, second.locB))
+        || (tileLocationsEqual(first.locA, second.locB) && tileLocationsEqual(first.locB, second.locA))
+    );
 }
 
 export function getAt(k: IKingdom, loc: ITileLocation) {
@@ -96,39 +96,39 @@ export function forEachHorizontalDominoLocation(action: (location: IDominoLocati
 
 const tileRange: ReadonlyArray<number> = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
 
-export function getTileCountForX(k:IKingdom, x:number) {
+export function getTileCountForX(k: IKingdom, x: number) {
     let count = 0;
-    for(const y of tileRange) {
-        if(hasTile(k, {x, y}))
+    for (const y of tileRange) {
+        if (hasTile(k, { x, y }))
             count++
     }
     return count;
 }
 
-export function getTileCountForY(k:IKingdom, y:number) {
+export function getTileCountForY(k: IKingdom, y: number) {
     let count = 0;
-    for(const x of tileRange) {
-        if(hasTile(k, {x, y}))
+    for (const x of tileRange) {
+        if (hasTile(k, { x, y }))
             count++
     }
     return count;
 }
 
-export function tileIsOverLimit(k:IKingdom, loc:ITileLocation, otherLoc:ITileLocation) {
+export function tileIsOverLimit(k: IKingdom, loc: ITileLocation, otherLoc: ITileLocation) {
     let yCount = getTileCountForY(k, loc.y);
     let xCount = getTileCountForX(k, loc.x);
     // account for loc Tile
     yCount++;
     xCount++;
     // account for other Tile
-    if(loc.x === otherLoc.x) xCount++;
-    if(loc.y === otherLoc.y) yCount++;
+    if (loc.x === otherLoc.x) xCount++;
+    if (loc.y === otherLoc.y) yCount++;
 
     return yCount > 5 || xCount > 5;
 }
 
 export function kingdomWouldBeValidSize(k: IKingdom, testLoc: IDominoLocation): boolean {
-    return !tileIsOverLimit(k, testLoc.locA, testLoc.locB) && !tileIsOverLimit(k, testLoc.locB, testLoc.locA);  
+    return !tileIsOverLimit(k, testLoc.locA, testLoc.locB) && !tileIsOverLimit(k, testLoc.locB, testLoc.locA);
 }
 
 
@@ -218,7 +218,7 @@ export function getValidLocations(k: IKingdom, domino: IDomino): { vertical: IDo
         if (locationAvailable(k, testLoc) &&
             verticalDominoMatches(k, domino, testLoc)
             //&& kingdomWouldBeValidSize(k, testLoc)
-            ) {
+        ) {
             valid.vertical.push(testLoc);
         }
     });
@@ -227,7 +227,7 @@ export function getValidLocations(k: IKingdom, domino: IDomino): { vertical: IDo
         if (locationAvailable(k, testLoc) &&
             horizontalDominoMatches(k, domino, testLoc)
             //&& kingdomWouldBeValidSize(k, testLoc)
-            ) {
+        ) {
             valid.horizontal.push(testLoc);
         }
     });
@@ -243,10 +243,11 @@ export function isValidLocation(k: IKingdom, d: IDomino, testLoc: IDominoLocatio
 /** @returns a new Kingdom with the given Domino placed at the given Location if the Location is valid */
 export function placeDomino(k: IKingdom, d: IDomino, dLoc: IDominoLocation): IKingdom {
     const updated: IEditableKingdom = deepCloneKingdom(k);
-    if (isValidLocation(k, d, dLoc)) {
-        updated.get(dLoc.locA.x)!.set(dLoc.locA.y, d.tileA);
-        updated.get(dLoc.locB.x)!.set(dLoc.locB.y, d.tileB);
+    if (!isValidLocation(k, d, dLoc)) {
+        throw new Error("Invalid location.");
     }
+    updated.get(dLoc.locA.x)!.set(dLoc.locA.y, d.tileA);
+    updated.get(dLoc.locB.x)!.set(dLoc.locB.y, d.tileB);
     return updated;
 }
 

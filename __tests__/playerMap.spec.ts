@@ -49,14 +49,17 @@ describe('PlayerMap', () => {
             k = placeDomino(k, findDomino(d, 7)!, { locA, locB });
             expect(getTileCountForY(k, 0)).toBe(3);
 
-            //expect(getValidLocations(k, findDomino(d, 7)!).horizontal).toContain()
+            expect(
+                getValidLocations(k, findDomino(d, 7)!).horizontal.find(
+                    dl => dominoLocationsEqual(dl, { locA: { x: -3, y: 0 }, locB: { x: -4, y: 0 } })))
+                    .toBeTruthy();
             k = placeDomino(k, findDomino(d, 7)!, { locA: { x: -3, y: 0 }, locB: { x: -4, y: 0 } });
+
             expect(getTileCountForY(k, 0)).toBe(5);
 
             const result = kingdomWouldBeValidSize(k, { locA: { x: 1, y: 0 }, locB: { x: 2, y: 0 } });
             expect(result).toBeFalsy();
             //            k = placeDomino(k, findDomino(d, 7)!, { locA: { x: 1, y: 0 }, locB: { x: 2, y: 0 } });
-            expect(k).toBeTruthy();
         });
     });
 
