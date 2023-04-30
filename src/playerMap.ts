@@ -33,7 +33,7 @@ export function getTileAt(k: IKingdom, loc: ITileLocation) {
 }
 
 export function locationAvailable(k: IKingdom, loc: IDominoLocation): boolean {
-    return !!getTileAt(k, loc.locA) && !!getTileAt(k, loc.locB);
+    return getTileAt(k, loc.locA) == undefined && getTileAt(k, loc.locB) === undefined;
 }
 
 /**       x  x  x  x x x x x x
