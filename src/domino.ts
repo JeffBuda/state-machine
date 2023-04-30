@@ -1,4 +1,4 @@
-import { ITile, TileKind, ITileLocation } from "./tile";
+import { ITile, TileKind, ITileLocation, tileToString } from "./tile";
 
 export enum DominoState {
     Uninitialized = "Uninitialized",
@@ -73,7 +73,7 @@ export interface IDomino {
 }
 
 export function dominoToString(domino:IDomino): string {
-    return `Domino ${domino.rank} with ${domino.tileA} and ${domino.tileB} (${domino.state} ${domino.pickedBy})`;
+    return `Domino ${domino.rank} with ${tileToString(domino.tileA)} and ${tileToString(domino.tileB)} (${domino.state} ${domino.pickedBy})`;
 }
 
 

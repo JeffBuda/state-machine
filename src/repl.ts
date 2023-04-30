@@ -1,51 +1,93 @@
 import * as repl from 'repl';
-import { DominoState, getDominosByState, sortByRank } from './domino';
-import { IPlayerManager, PMContext, PMEvent, PlayerManagerType, createPlayerManager, getPMContext } from './playerManager';
+import { DominoState, getDominos, getDominosByState, sortByRank, dominoToString, findDomino } from './domino';
+import { getNewKingdom, getValidLocations, isValidLocation, kingdomToString, placeDomino } from './playerMap';
 
 
 const prompt = '> ';
 
 const replServer = repl.start({ prompt });
-const pm = (rs:repl.REPLServer):PlayerManagerType => rs.context.playerManager;
-replServer.context.playerManager = createPlayerManager(); 
-pm(replServer).onTransition((state, event)=>{
-    console.log(state);
-    console.log(event);
-    // console.log(`Transition: ${event.type} ${event}`);
-    // if (event.error) {
-    //     console.log(`Transition failed with error: ${event.error}`);
-    //   } else {
-    //     console.log(`Transition was successful`);
-    //   }
-});
 
-replServer.defineCommand('gameClaim', {
-    help: 'Claim a Domino for a Player (playerName dominoId)',
+replServer.context.kingdom = getNewKingdom();
+replServer.context.dominos = getDominos();
+
+replServer.defineCommand('gamePrint',{
+    help: 'Prints the Kingdom',
     action(text) {
-        const player = text.split(' ')[0];
-        const domino = parseInt(text.split(' ')[1]);
-        pm(replServer).send({type: PMEvent.playerClaimsDomino, player: player, dominoId: domino});
+        console.log(kingdomToString(replServer.context.kingdom));
         this.displayPrompt();
     }
 });
 
+replServer.defineCommand('gamePrintDomino',{
+    help: 'Prints the Domino',
+    action(text) {
+        const args = text.split(' ');
+        const rank = parseInt(args[0]);
+        console.log(dominoToString(findDomino(replServer.context.dominos, rank)!));
+        this.displayPrompt();
+    }
+});
+
+replServer.defineCommand('gameValidLocations',{
+    help: 'Prints the valid locations (rank)',
+    action(text) {
+        const args = text.split(' ');
+        const rank = parseInt(args[0]);
+        console.log(
+            JSON.stringify(
+                getValidLocations(
+                    replServer.context.kingdom, 
+                    findDomino(replServer.context.dominos, rank)!),
+                    null,
+                    2));
+        this.displayPrompt();
+    }
+});
+
+
+replServer.defineCommand('gamePlace', {
+    help: 'Place a Domino (rank, x1, y1, x2, y2)',
+    action(text) {
+        const k = replServer.context.kingdom;
+        const dominos = replServer.context.dominos;
+        const args = text.split(' ');
+        const rank = parseInt(args[0]);
+        const x1 = parseInt(args[1]);
+        const y1 = parseInt(args[2]);
+        const x2 = parseInt(args[3]);
+        const y2 = parseInt(args[4]);
+        const dLoc = { locA: { x: x1, y: y1 }, locB: { x: x2, y: y2 } };
+        const d = findDomino(dominos, rank)!;
+        
+        if (!isValidLocation(replServer.context.kingdom, d, dLoc)) {
+            console.log('Invalid location.');
+        } else {
+            placeDomino(k, d, dLoc);
+            console.log(kingdomToString(k));
+        }
+
+        this.displayPrompt();
+    }
+});
+
+
 replServer.defineCommand('gameListDominoStates', {
     help: 'Shows all domino states',
     action(text) {
-        for(const ds in DominoState)
+        for (const ds in DominoState)
             console.log(ds);
         this.displayPrompt();
     }
 });
 
-replServer.defineCommand('gameListDominos', {
-    help: 'Shows all dominos of a given state',
-    action(text) {
-        const dominos = getDominosByState((getPMContext(pm(replServer))).dominos, text as DominoState);
-        dominos.sort(sortByRank).forEach(d => console.log(d.toString()));
-        this.displayPrompt();
-    }
-});
+// replServer.defineCommand('gameListDominos', {
+//     help: 'Shows all dominos of a given state',
+//     action(text) {
+//         const dominos = getDominosByState((getPMContext(pm(replServer))).dominos, text as DominoState);
+//         dominos.sort(sortByRank).forEach(d => console.log(d.toString()));
+//         this.displayPrompt();
+//     }
+// });
 
 // replServer.defineCommand('gameListPicks', {
 //     help: 'List Pick List',
@@ -71,7 +113,7 @@ replServer.defineCommand('gameListDominos', {
 //             GameStateAction.Claim_Player1,
 //             {player: playerNumber, dominoId: parseInt(dominoRank)},
 //             replServer.context.gameData as IGameData);
-        
+
 //             const dominos = dominosOfState((replServer.context.gameData as IGameData).dominos, text as DominoState);
 //         dominos.sort(sortByRank).forEach(d => console.log(d.toString()));
 //         this.displayPrompt();
@@ -80,9 +122,9 @@ replServer.defineCommand('gameListDominos', {
 
 
 replServer.defineCommand('exit', {
-  help: 'Exit the REPL',
-  action() {
-    process.exit(0);
-  },
+    help: 'Exit the REPL',
+    action() {
+        process.exit(0);
+    },
 });
 

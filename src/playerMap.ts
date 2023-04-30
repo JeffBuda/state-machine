@@ -221,3 +221,43 @@ export function isValidLocation(k:IKingdom, d:IDomino, testLoc:IDominoLocation) 
     const valid = getValidLocations(k, d);
     return undefined !== [...valid.horizontal, ...valid.vertical].find(c => locationsEqual(c, testLoc));
 }
+
+export function placeDomino(k:IKingdom, d:IDomino, dLoc:IDominoLocation) {
+    if(isValidLocation(k, d, dLoc)) {
+        k[dLoc.locA.x][dLoc.locA.y] = d.tileA;
+        k[dLoc.locB.x][dLoc.locB.y] = d.tileB;
+    }
+}
+
+export function kingdomToString(k:IKingdom) {
+    let s = "\n";
+    s += "  -4-3-2-1 0 1 2 3 4";
+    s += "\n";
+    for (let y = -4; y < 5; y++) {
+      s += y >= 0 ? " " + y : y;
+      for (let x = -4; x < 5; x++) {
+        const tile = k?.[x]?.[y]; 
+        if (tile === undefined) {
+          s += " .";
+        } else if (tile.kind === TileKind.castle) {
+          s += " C";
+        } else if (tile.kind === TileKind.forest) {
+          s += " F"; 
+        } else if (tile.kind === TileKind.field) {
+          s += " f";
+        } else if(tile.kind === TileKind.mine) {
+          s += " M";
+        } else if(tile.kind === TileKind.swamp) {
+          s += " S";
+        } else if(tile.kind === TileKind.water) {
+          s += " w";
+        } else if(tile.kind === TileKind.wheat) {
+          s += " W";
+        } else {
+          s += " ?";
+        }
+      }
+      s += "\n";
+    }
+    return s;
+  }
