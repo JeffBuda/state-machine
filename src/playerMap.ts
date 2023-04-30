@@ -217,7 +217,7 @@ export function getValidLocations(k: IKingdom, domino: IDomino): { vertical: IDo
     forEachVerticalDominoLocation((testLoc) => {
         if (locationAvailable(k, testLoc) &&
             verticalDominoMatches(k, domino, testLoc)
-            //&& kingdomWouldBeValidSize(k, testLoc)
+            && kingdomWouldBeValidSize(k, testLoc)
         ) {
             valid.vertical.push(testLoc);
         }
@@ -226,7 +226,7 @@ export function getValidLocations(k: IKingdom, domino: IDomino): { vertical: IDo
     forEachHorizontalDominoLocation((testLoc) => {
         if (locationAvailable(k, testLoc) &&
             horizontalDominoMatches(k, domino, testLoc)
-            //&& kingdomWouldBeValidSize(k, testLoc)
+            && kingdomWouldBeValidSize(k, testLoc)
         ) {
             valid.horizontal.push(testLoc);
         }
