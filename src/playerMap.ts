@@ -28,11 +28,11 @@ export function getNewKingdom(): IKingdom {
     return tiles;
 }
 
-export function getTileAt(k:IKingdom, loc:ITileLocation) {
-    return k[loc.x][loc.y];
+export function getTileAt(k: IKingdom, loc: ITileLocation) {
+    return k?.[loc.x]?.[loc.y];
 }
 
-export function locationAvailable(k:IKingdom, loc:IDominoLocation):boolean {
+export function locationAvailable(k: IKingdom, loc: IDominoLocation): boolean {
     return !!getTileAt(k, loc.locA) && !!getTileAt(k, loc.locB);
 }
 
@@ -50,13 +50,9 @@ export function locationAvailable(k:IKingdom, loc:IDominoLocation):boolean {
  * 
 */
 export function forEachVerticalDominoLocation(action: (location: IDominoLocation) => void) {
-    for (var x1 of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
-        for (var y1 of [-4, -3, -2, -1, 0, 1, 2, 3]) {
-            for (var x2 of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
-                for (var y2 of [-3, -2, -1, 0, 1, 2, 3, 4]) {
-                    action({locA: {x: x1, y: y1}, locB: {x: x2, y: y2}});
-                }
-            }
+    for (var x of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
+        for (var y of [-4, -3, -2, -1, 0, 1, 2, 3]) {
+            action({ locA: { x, y }, locB: { x: x, y: y + 1 } });
         }
     }
 }
@@ -75,39 +71,35 @@ export function forEachVerticalDominoLocation(action: (location: IDominoLocation
  * 
 */
 export function forEachHorizontalDominoLocation(action: (location: IDominoLocation) => void) {
-    for (var x1 of [-4, -3, -2, -1, 0, 1, 2, 3]) {
-        for (var y1 of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
-            for (var x2 of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
-                for (var y2 of [-3, -2, -1, 0, 1, 2, 3, 4]) {
-                    action({locA: {x: x1, y: y1}, locB: {x: x2, y: y2}});
-                }
-            }
+    for (var x of [-4, -3, -2, -1, 0, 1, 2, 3]) {
+        for (var y of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
+            action({ locA: { x: x, y }, locB: { x: x + 1, y } });
         }
     }
 }
 
-export function kingdomWouldBeValidSize(k:IKingdom, testLoc:IDominoLocation):boolean {
-    
+export function kingdomWouldBeValidSize(k: IKingdom, testLoc: IDominoLocation): boolean {
+
     for (var x of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
         var columnCount = 0;
-        if(testLoc.locA.x === x) {
+        if (testLoc.locA.x === x) {
             columnCount++;
         }
-        if(testLoc.locB.x === x) {
+        if (testLoc.locB.x === x) {
             columnCount++;
         }
         for (var y of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
             var rowCount = 0;
-            if(testLoc.locA.y === y) {
+            if (testLoc.locA.y === y) {
                 rowCount++;
             }
-            if(testLoc.locB.y === y) {
+            if (testLoc.locB.y === y) {
                 rowCount++;
-            }    
-            if(!!getTileAt(k, {x, y})){
+            }
+            if (!!getTileAt(k, { x, y })) {
                 columnCount++;
                 rowCount++;
-                if(columnCount > 5 || rowCount > 5) {
+                if (columnCount > 5 || rowCount > 5) {
                     return false;
                 }
             }
@@ -124,26 +116,26 @@ export function kingdomWouldBeValidSize(k:IKingdom, testLoc:IDominoLocation):boo
  * y -2         
  */
 function getLeftTile(k: IKingdom, t: ITileLocation) {
-    return k[t.x - 1][t.y];
+    return k?.[t.x - 1]?.[t.y];
 }
 
 function getRightTile(k: IKingdom, t: ITileLocation) {
-    return k[t.x + 1][t.y];
+    return k?.[t.x + 1]?.[t.y];
 }
 
 function getUpTile(k: IKingdom, t: ITileLocation) {
-    return k[t.x][t.y - 1];
+    return k?.[t.x]?.[t.y - 1];
 }
 
 function getDownTile(k: IKingdom, t: ITileLocation) {
-    return k[t.x][t.y + 1];
+    return k?.[t.x]?.[t.y + 1];
 }
 
 function tilesMatch(a?: ITile, b?: ITile) {
-    return !!a && 
-        !!b && 
-        !!a.kind && 
-        !!b.kind && 
+    return !!a &&
+        !!b &&
+        !!a.kind &&
+        !!b.kind &&
         (a.kind === b.kind || a.kind === TileKind.castle || b.kind === TileKind.castle);
 }
 
@@ -195,29 +187,29 @@ function horizontalDominoMatches(k: IKingdom, domino: IDomino, loc: IDominoLocat
     return false;
 }
 
-export function kingdomIsValidWidth(k:IKingdom) {
+export function kingdomIsValidWidth(k: IKingdom) {
 
 }
 
-export function getValidLocations(k:IKingdom, domino:IDomino): {vertical: IDominoLocation[], horizontal: IDominoLocation[]} {
+export function getValidLocations(k: IKingdom, domino: IDomino): { vertical: IDominoLocation[], horizontal: IDominoLocation[] } {
 
-    const valid:{vertical: IDominoLocation[], horizontal: IDominoLocation[]} = {vertical:[], horizontal:[]}
+    const valid: { vertical: IDominoLocation[], horizontal: IDominoLocation[] } = { vertical: [], horizontal: [] }
 
     forEachVerticalDominoLocation((testLoc) => {
-        console.log('(', testLoc.locA.x, ', ', testLoc.locA.y, ') (', testLoc.locB.x, ', ', testLoc.locB.y, ')');
-        if(locationAvailable(k, testLoc) && 
+       // console.log('(', testLoc.locA.x, ', ', testLoc.locA.y, ') (', testLoc.locB.x, ', ', testLoc.locB.y, ')');
+        if (locationAvailable(k, testLoc) &&
             verticalDominoMatches(k, domino, testLoc) &&
             kingdomWouldBeValidSize(k, testLoc)) {
             valid.vertical.push(testLoc);
-        }                
+        }
     });
 
     forEachHorizontalDominoLocation((testLoc) => {
-        if(locationAvailable(k, testLoc) && 
+        if (locationAvailable(k, testLoc) &&
             horizontalDominoMatches(k, domino, testLoc) &&
             kingdomWouldBeValidSize(k, testLoc)) {
             valid.horizontal.push(testLoc);
-        }                
+        }
     });
 
     // for each of tileA, tileB
