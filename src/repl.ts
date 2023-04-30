@@ -1,6 +1,6 @@
 import * as repl from 'repl';
 import { DominoState, getDominos, getDominosByState, sortByRank, dominoToString, findDomino } from './domino';
-import { getNewKingdom, getValidLocations, isValidLocation, kingdomToString, placeDomino } from './playerMap';
+import { getNewKingdom, getValidLocations, isValidLocation, kingdomToJSON, kingdomToString, placeDomino } from './playerMap';
 
 
 const prompt = '> ';
@@ -14,6 +14,14 @@ replServer.defineCommand('gamePrint',{
     help: 'Prints the Kingdom',
     action(text) {
         console.log(kingdomToString(replServer.context.kingdom));
+        this.displayPrompt();
+    }
+});
+
+replServer.defineCommand('gamePrintJson',{
+    help: 'Prints the Kingdom as JSON',
+    action(text) {
+        console.log(kingdomToJSON(replServer.context.kingdom));
         this.displayPrompt();
     }
 });
@@ -58,11 +66,11 @@ replServer.defineCommand('gamePlace', {
         const y2 = parseInt(args[4]);
         const dLoc = { locA: { x: x1, y: y1 }, locB: { x: x2, y: y2 } };
         const d = findDomino(dominos, rank)!;
-        
+
         if (!isValidLocation(replServer.context.kingdom, d, dLoc)) {
             console.log('Invalid location.');
         } else {
-            placeDomino(k, d, dLoc);
+            replServer.context.kingdom = placeDomino(k, d, dLoc);
             console.log(kingdomToString(k));
         }
 

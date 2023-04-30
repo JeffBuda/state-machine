@@ -14,10 +14,11 @@ import { IDominoLocation, ITile, ITileLocation, TileKind } from "./tile";
  *  4                     .
  * 
 */
-export type IKingdom = (ITile | undefined)[][];
+export type IKingdom = ReadonlyArray<ReadonlyArray<ITile | undefined>>;
+type IEditableKingdom = Array<Array<ITile | undefined>>;
 
 export function getNewKingdom(): IKingdom {
-    const tiles: IKingdom = [];
+    const tiles: IEditableKingdom = [];
     for (var x of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
         tiles[x] = [];
         for (var y of [-4, -3, -2, -1, 0, 1, 2, 3, 4]) {
@@ -28,11 +29,11 @@ export function getNewKingdom(): IKingdom {
     return tiles;
 }
 
-export function locationsEqual(first:IDominoLocation, second:IDominoLocation) {
-    return first.locA.x === second.locA.x && 
-    first.locA.y === second.locA.y &&
-    first.locB.x === second.locB.x &&
-    first.locB.y === second.locB.y;
+export function locationsEqual(first: IDominoLocation, second: IDominoLocation) {
+    return first.locA.x === second.locA.x &&
+        first.locA.y === second.locA.y &&
+        first.locB.x === second.locB.x &&
+        first.locB.y === second.locB.y;
 }
 
 export function getTileAt(k: IKingdom, loc: ITileLocation) {
@@ -217,47 +218,54 @@ export function getValidLocations(k: IKingdom, domino: IDomino): { vertical: IDo
     return valid;
 }
 
-export function isValidLocation(k:IKingdom, d:IDomino, testLoc:IDominoLocation) {
+export function isValidLocation(k: IKingdom, d: IDomino, testLoc: IDominoLocation) {
     const valid = getValidLocations(k, d);
     return undefined !== [...valid.horizontal, ...valid.vertical].find(c => locationsEqual(c, testLoc));
 }
 
-export function placeDomino(k:IKingdom, d:IDomino, dLoc:IDominoLocation) {
-    if(isValidLocation(k, d, dLoc)) {
-        k[dLoc.locA.x][dLoc.locA.y] = d.tileA;
-        k[dLoc.locB.x][dLoc.locB.y] = d.tileB;
+/** @returns a new Kingdom with the given Domino placed at the given Location if the Location is valid */
+export function placeDomino(k: IKingdom, d: IDomino, dLoc: IDominoLocation): IKingdom {
+    const updated:IEditableKingdom = [...k.map(a => [...a])];
+    if (isValidLocation(k, d, dLoc)) {
+        updated[dLoc.locA.x][dLoc.locA.y] = d.tileA;
+        updated[dLoc.locB.x][dLoc.locB.y] = d.tileB;
     }
+    return updated;
 }
 
-export function kingdomToString(k:IKingdom) {
+export function kingdomToJSON(k: ReadonlyArray<ReadonlyArray<ITile>>) {
+    return JSON.stringify(k);
+}
+
+export function kingdomToString(k: IKingdom) {
     let s = "\n";
     s += "  -4-3-2-1 0 1 2 3 4";
     s += "\n";
     for (let y = -4; y < 5; y++) {
-      s += y >= 0 ? " " + y : y;
-      for (let x = -4; x < 5; x++) {
-        const tile = k?.[x]?.[y]; 
-        if (tile === undefined) {
-          s += " .";
-        } else if (tile.kind === TileKind.castle) {
-          s += " C";
-        } else if (tile.kind === TileKind.forest) {
-          s += " F"; 
-        } else if (tile.kind === TileKind.field) {
-          s += " f";
-        } else if(tile.kind === TileKind.mine) {
-          s += " M";
-        } else if(tile.kind === TileKind.swamp) {
-          s += " S";
-        } else if(tile.kind === TileKind.water) {
-          s += " w";
-        } else if(tile.kind === TileKind.wheat) {
-          s += " W";
-        } else {
-          s += " ?";
+        s += y >= 0 ? " " + y : y;
+        for (let x = -4; x < 5; x++) {
+            const tile = k?.[x]?.[y];
+            if (tile === undefined) {
+                s += " .";
+            } else if (tile.kind === TileKind.castle) {
+                s += " C";
+            } else if (tile.kind === TileKind.forest) {
+                s += " F";
+            } else if (tile.kind === TileKind.field) {
+                s += " f";
+            } else if (tile.kind === TileKind.mine) {
+                s += " M";
+            } else if (tile.kind === TileKind.swamp) {
+                s += " S";
+            } else if (tile.kind === TileKind.water) {
+                s += " w";
+            } else if (tile.kind === TileKind.wheat) {
+                s += " W";
+            } else {
+                s += " ?";
+            }
         }
-      }
-      s += "\n";
+        s += "\n";
     }
     return s;
-  }
+}
